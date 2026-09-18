@@ -1,0 +1,25 @@
+entity User in [Role];
+entity Role in [Role];
+entity HazardReport;
+entity RoadCorridor;
+entity SystemAlert;
+
+action SubmitHazardReport appliesTo {
+  principal: [User],
+  resource: [HazardReport]
+};
+
+action VerifyHazardReport appliesTo {
+  principal: [User],
+  resource: [HazardReport]
+};
+
+action UpdateRoadStatus appliesTo {
+  principal: [User],
+  resource: [RoadCorridor]
+};
+
+action DispatchRegionalAlert appliesTo {
+  principal: [User],
+  resource: [SystemAlert]
+};

@@ -1,0 +1,3 @@
+cpus: 4
+memory: "8GiB"
+disk_size: "30GiB"

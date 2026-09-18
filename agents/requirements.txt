@@ -1,0 +1,6 @@
+strands-agents
+opensearch-py
+scikit-learn
+joblib
+httpx
+pydantic

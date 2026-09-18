@@ -1,0 +1,17 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  },
+  "mappings": {
+    "properties": {
+      "corridor_id": { "type": "keyword" },
+      "name": { "type": "text" },
+      "highway": { "type": "keyword" },
+      "status": { "type": "keyword" },
+      "risk_level": { "type": "keyword" },
+      "settlements_served": { "type": "keyword" },
+      "geometry": { "type": "geo_shape" }
+    }
+  }
+}

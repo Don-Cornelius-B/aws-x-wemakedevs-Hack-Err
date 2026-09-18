@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+boto3
+opensearch-py
+networkx
+python-jose[cryptography]
+cedarpy
+python-multipart

@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  opensearch:
+    image: opensearchproject/opensearch:2.12.0
+    container_name: opensearch
+    environment:
+      - discovery.type=single-node
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - DISABLE_SECURITY_PLUGIN=true
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    networks:
+      - ner-net
+
+  localstack:
+    image: localstack/localstack:3.8.0
+    container_name: localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,sqs,lambda
+      - DEFAULT_REGION=us-east-1
+    volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./.localstack}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - ner-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENSEARCH_HOST=http://opensearch:9200
+      - LOCALSTACK_ENDPOINT=http://localstack:4566
+      - AWS_REGION=us-east-1
+    depends_on:
+      - opensearch
+      - localstack
+    volumes:
+      - ./backend/app:/app/app
+      - ./policies:/app/policies
+      - ./ml:/app/ml
+    networks:
+      - ner-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - ner-net
+
+networks:
+  ner-net:
+    driver: bridge

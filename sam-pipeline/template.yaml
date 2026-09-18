@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  ner-landslide-guard-pipeline
+  SAM Template for local AWS emulation of image processing and alert dispatch.
+
+Resources:
+  HazardUploadBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ner-hazard-uploads
+
+  AlertNotificationQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ner-alert-notifications
+
+  ImageProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/image_processor/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Architectures:
+        - x86_64
+      Events:
+        HazardUpload:
+          Type: S3
+          Properties:
+            Bucket: !Ref HazardUploadBucket
+            Events: s3:ObjectCreated:*
+      Environment:
+        Variables:
+          OPENSEARCH_HOST: http://host.docker.internal:9200
+          LOCALSTACK_ENDPOINT: http://host.docker.internal:4566
+
+  AlertDispatcherFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/alert_dispatcher/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          LOCALSTACK_ENDPOINT: http://host.docker.internal:4566
+          QUEUE_URL: http://host.docker.internal:4566/000000000000/ner-alert-notifications
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt AlertNotificationQueue.QueueName
